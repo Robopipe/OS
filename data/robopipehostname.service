@@ -1,0 +1,13 @@
+[Unit]
+description=Set robopipe controller hostname
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/robopipe/tools/set-robopipe-hostname.sh
+RemainAfterExit=true
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

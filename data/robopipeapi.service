@@ -1,0 +1,13 @@
+[Unit]
+Description=Start Robopipe API
+After=network.target
+
+[Service]
+ExecStart=robopipe-api
+Restart=always
+User=robopipe
+Group=robopipe
+Environment="CORS_ORIGINS=*"
+
+[Install]
+WantedBy=multi-user.target
