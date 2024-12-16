@@ -15,12 +15,20 @@ jobs:
         with:
           lfs: true
 
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install QEMU for ARM64
+        uses: docker/setup-qemu-action@v2
+        with:
+          platform: linux/arm64
+
       - name: Build OS
         env:
           INSTALL_DEPS: true
         shell: bash
         run: |
-          sudo ./build-os.sh
+          ./build-in-docker.sh
 
       - name: Create release
         id: create_release
