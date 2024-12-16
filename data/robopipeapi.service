@@ -7,7 +7,7 @@ ExecStart=robopipe-api
 Restart=always
 User=robopipe
 Group=robopipe
-Environment="CORS_ORIGINS=*"
+Environment="ROBOPIPE_API_ENV=/etc/robopipe/.env"
 
 [Install]
 WantedBy=multi-user.target
