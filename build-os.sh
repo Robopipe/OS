@@ -103,8 +103,8 @@ done
 prepare-base-os
 cd base-os/archive
 
-mount -t proc proc root/proc/
-mount -t sysfs sys root/sys/
+mount -t proc /proc root/proc/
+mount -t sysfs /sys root/sys/
 mount -o bind /dev root/dev/
 mount -o bind "${DATA_PATH}" root/mnt/
 
