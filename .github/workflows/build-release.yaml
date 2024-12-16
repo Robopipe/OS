@@ -20,7 +20,7 @@ jobs:
           INSTALL_DEPS: true
         shell: bash
         run: |
-          ./build-os.sh
+          sudo ./build-os.sh
 
       - name: Create release
         id: create_release
