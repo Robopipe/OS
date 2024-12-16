@@ -4,7 +4,13 @@ DATA_PATH=${1:-"data"}
 DESTINATION=${2:-"archive.swu"}
 
 prepare-base-os() {
-    wget https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20240917.1.zip -O base-os.zip
+    if [ -f "${DATA_PATH}/base-os.zip" ];
+    then
+        cp "${DATA_PATH}/base-os.zip" "base-os.zip"
+    else
+        wget https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20240917.1.zip -O base-os.zip
+    fi
+
     unzip base-os.zip -d base-os && rm base-os.zip
     cd base-os
     mkdir archive && cd archive
