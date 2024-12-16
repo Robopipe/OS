@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run --privileged --rm -v $(pwd):/mnt debian:bookworm bash -c "INSTALL_DEPS=true /mnt/build-os.sh /mnt/archive.swu"
+docker run --privileged --rm -v $(pwd):/mnt debian:bookworm bash -c "INSTALL_DEPS=true /mnt/build-os.sh /mnt/data /mnt/archive.swu"

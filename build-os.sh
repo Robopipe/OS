@@ -1,6 +1,7 @@
 #!/bin/bash
 
-DESTINATION=${1:-"archive.swu"}
+DATA_PATH=${1:-"data"}
+DESTINATION=${2:-"archive.swu"}
 
 prepare-base-os() {
     wget https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20240917.1.zip -O base-os.zip
@@ -29,7 +30,10 @@ configure_os() {
     mv /etc/resolv.conf /etc/resolv.conf.bak
     echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
-    apt update && apt install -y pipx git nginx
+    mkdir -p /opt/robopipe/tools
+    mkdir -p /etc/robopipe
+
+    apt update && apt install -y pipx git nginx owserver
 
     cp -r /home/unipi/ /home/robopipe/
     useradd -d /home/robopipe -s /bin/bash robopipe
@@ -38,7 +42,6 @@ configure_os() {
     usermod -aG sudo,unipi,dialout,i2c,spi,gpio robopipe
 
     systemctl disable unipihostname
-    mkdir -p /opt/robopipe/tools
     cp /mnt/robopipehostname.service /etc/systemd/system/
     cp /mnt/set-robopipe-hostname.sh /opt/robopipe/tools/
     systemctl enable robopipehostname
@@ -52,6 +55,10 @@ configure_os() {
     pipx ensurepath --global
     pipx install --global /mnt/robopipe_api-0.1.0.tar.gz
     cp /mnt/robopipeapi.service /etc/systemd/system/
+    cp /mnt/controller-config-autogen.sh /opt/unipi/os-configurator/run.d/60-controller-config-autogen.sh
+    cp -r /mnt/hw_definitions/ /etc/robopipe/hw_definitions/
+    cp /mnt/controller-config.yaml /etc/robopipe/config.yaml
+    cp /mnt/robopipe-api.env /etc/robopipe/.env
     systemctl enable robopipeapi
 
     openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/certs/server.key -out /etc/ssl/certs/server.cert \
@@ -90,7 +97,7 @@ cd base-os/archive
 mount -t proc proc root/proc/
 mount -t sysfs sys root/sys/
 mount -o bind /dev root/dev/
-mount -o bind /mnt/data root/mnt/
+mount -o bind "${DATA_PATH}" root/mnt/
 
 sudo chroot root /bin/sh -c "$(declare -f configure_os); configure_os"
 
