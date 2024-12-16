@@ -18,6 +18,7 @@ jobs:
       - name: Build OS
         env:
           INSTALL_DEPS: true
+        shell: bash
         run: |
           ./build-os.sh
 
