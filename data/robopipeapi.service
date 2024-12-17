@@ -1,12 +1,13 @@
 [Unit]
 Description=Start Robopipe API
-After=network.target
+After=robopipehostname.service
+Requires=robopipehostname.service
 
 [Service]
-ExecStart=robopipe-api
+ExecStart=/bin/sh -c 'HOSTNAME=$(hostname); robopipe-api'
 Restart=always
-User=robopipe
-Group=robopipe
+User=root
+Group=root
 Environment="ROBOPIPE_API_ENV=/etc/robopipe/.env"
 
 [Install]
