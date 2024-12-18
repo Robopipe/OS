@@ -4,7 +4,7 @@ After=robopipehostname.service
 Requires=robopipehostname.service
 
 [Service]
-ExecStart=/bin/sh -c 'HOSTNAME=$(hostname); robopipe-api'
+ExecStart=/bin/sh -c 'HOSTNAME=$(hostname) robopipe-api'
 Restart=always
 User=root
 Group=root
