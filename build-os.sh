@@ -67,6 +67,7 @@ configure_os() {
     cp -r /mnt/hw_definitions/ /etc/robopipe/hw_definitions/
     cp /mnt/controller-config.yaml /etc/robopipe/config.yaml
     cp /mnt/robopipe-api.env /etc/robopipe/.env
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' > /etc/udev/rules.d/80-movidius.rules
     systemctl enable robopipeapi
 
     openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/certs/server.key -out /etc/ssl/certs/server.cert \
