@@ -35,6 +35,8 @@ archive() {
 }
 
 configure_os() {
+    _USERNAME="admin"
+
     mv /etc/resolv.conf /etc/resolv.conf.bak
     echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
@@ -42,12 +44,13 @@ configure_os() {
     mkdir -p /etc/robopipe
 
     apt update && apt install -y pipx git nginx owserver avahi-utils
+    apt install -y --no-install-recommends evok-unipi-data
 
-    cp -r /home/unipi/ /home/robopipe/
-    useradd -d /home/robopipe -s /bin/bash robopipe
-    echo "robopipe:robopipe.io" | chpasswd
-    find /home/robopipe/ -user root -exec chown robopipe:robopipe {} \;
-    usermod -aG sudo,unipi,dialout,i2c,spi,gpio robopipe
+    cp -r /home/unipi/ "/home/${_USERNAME}/"
+    useradd -d "/home/${_USERNAME}" -s /bin/bash ${_USERNAME}
+    echo "${_USERNAME}:robopipe.io" | chpasswd
+    find "/home/${_USERNAME}/" -user root -exec chown ${_USERNAME}:${_USERNAME} {} \;
+    usermod -aG sudo,unipi,dialout,i2c,spi,gpio ${_USERNAME}
 
     systemctl disable unipihostname
     cp /mnt/robopipehostname.service /etc/systemd/system/
@@ -63,8 +66,8 @@ configure_os() {
     pipx ensurepath --global
     pipx install --global /mnt/robopipe_api-0.1.0.tar.gz
     cp /mnt/robopipeapi.service /etc/systemd/system/
-    cp /mnt/controller-config-autogen.sh /opt/unipi/os-configurator/run.d/60-controller-config-autogen.sh
-    cp -r /mnt/hw_definitions/ /etc/robopipe/hw_definitions/
+    ln -s /etc/evok/hw_definitions /etc/robopipe/hw_definitions
+    ln -s /etc/evok/autogen.yaml /etc/robopipe/autogen.yaml
     cp /mnt/controller-config.yaml /etc/robopipe/config.yaml
     cp /mnt/robopipe-api.env /etc/robopipe/.env
     echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' > /etc/udev/rules.d/80-movidius.rules
@@ -72,7 +75,7 @@ configure_os() {
 
     openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/certs/server.key -out /etc/ssl/certs/server.cert \
     -sha256 -days 3650 -nodes \
-    -subj "/CN=robopipe-controller.local"
+    -subj "/CN=robopipe.local"
     cp /mnt/robopipe-api.conf /etc/nginx/sites-available/robopipe-api
     rm /etc/nginx/sites-enabled/default
     ln -s /etc/nginx/sites-available/robopipe-api /etc/nginx/sites-enabled/robopipe-api
