@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOSTNAME_PREFIX="robopipe-controller"
+HOSTNAME_PREFIX="robopipe"
 SEQUENCE_NUMBER="1"
 
 while true;
