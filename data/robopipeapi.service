@@ -6,8 +6,8 @@ Requires=robopipehostname.service
 [Service]
 ExecStart=/bin/sh -c 'HOSTNAME=$(hostname) robopipe-api'
 Restart=always
-User=root
-Group=root
+User=admin
+Group=admin
 Environment="ROBOPIPE_API_ENV=/etc/robopipe/.env"
 
 [Install]
