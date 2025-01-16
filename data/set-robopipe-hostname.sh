@@ -3,9 +3,11 @@
 HOSTNAME_PREFIX="robopipe"
 SEQUENCE_NUMBER="1"
 
+avahi-daemon --kill
+
 while true;
 do
-    IP=$(avahi-resolve --name "${HOSTNAME_PREFIX}-${SEQUENCE_NUMBER}.local" 2>/dev/null | cut -f 2)
+    IP=$(avahi-resolve -t --name "${HOSTNAME_PREFIX}-${SEQUENCE_NUMBER}.local" 2>/dev/null | cut -f 2)
 
     if [ -n "${IP}" ]; then
         SEQUENCE_NUMBER=$((SEQUENCE_NUMBER + 1))
