@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <link rel="icon" href="images/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/dropzone.min.css" />
+    <link rel="stylesheet" href="css/fontawesome.min.css" />
+    <link rel="stylesheet" href="css/solid.min.css" />
+    <link rel="stylesheet" href="css/swupdate.min.css" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/dropzone.min.js"></script>
+    <script src="js/swubuttons.min.js"></script>
+    <script src="js/swupdate.min.js"></script>
+    <title>SWUpdate - Software Update for Embedded Systems</title>
+  </head>
+  <body>
+    <div
+      class="modal fade"
+      id="confirm-change"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">Are you sure?</div>
+          <div class="modal-body">
+            All your network setting in /etc/network/interfaces will be
+            overwritten, eth0 and eth1 will be bridged (br0). Old files are
+            preserved with prefix as backup in the same directory.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-danger btn-ok" data-dismiss="modal">
+              Agree
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="modal fade"
+      id="confirm-backup"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">Are you sure?</div>
+          <div class="modal-body">
+            <b>The USB drive should be a FAT32 file system!</b><br /><br />The
+            backup will be created on exFAT file system too but it can be used
+            for restore through the web interface only.<br />The final
+            archive.swu will be packed as multi zip file if the backup oversize
+            4GB.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-danger btn-ok" data-dismiss="modal">
+              Agree
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Navigation Header -->
+    <nav
+      class="navbar sticky-top navbar-expand-sm navbar-dark"
+      style="background-color: #0f0f18 !important"
+    >
+      <div class="container">
+        <a class="navbar-brand" href="#"
+          ><img
+            class="d-inline-block align-top"
+            src="images/logo.svg"
+            alt=""
+            height="35"
+            style="opacity: 0.7"
+          /> </a
+        ><span style="color: rgba(255, 255, 255, 0.7); font-size: 130%"
+          >service mode</span
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarText"
+          aria-controls="navbarText"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a id="run-shell" class="nav-link" href="#"
+                ><i class="fas fa-terminal"></i> Run shell</a
+              >
+            </li>
+            <li class="nav-item">
+              <a id="swu-restart" class="nav-link" href="#"
+                ><i class="fas fa-sync"></i> Restart System</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Use Bootstrap Grid Container -->
+    <div class="container">
+      <div class="row my-3">
+        <div class="col">
+          <div class="card">
+            <div class="card-header pb-0">
+              <h5><i class="fas fa-wrench"></i> Settings</h5>
+              <i>New settings are active after reboot!</i>
+            </div>
+            <div class="card-body" id="swubuttons"></div>
+          </div>
+          <div class="card">
+            <div class="card-header pb-0">
+              <h5><i class="fas fa-wrench"></i> Backup</h5>
+            </div>
+            <div class="card-body">
+              <button
+                class="btn"
+                value="createbackupusb"
+                data-toggle="modal"
+                data-target="#confirm-backup"
+              >
+                Backup to USB flash
+              </button>
+            </div>
+          </div>
+          <!--
+        <div class="card">
+          <div class="card-header pb-0">
+            <h5><i class="fas fa-wrench"></i> Evok Settings</h5>
+          </div>
+          <div class="card-body">
+           <button class="btn" id="setevok">Enable Evok</button>
+           <button class="btn" id="unsetevok">Disable Evok</button>
+          </div>
+        </div>
+        --></div>
+      </div>
+      <div class="row my-3">
+        <div class="col">
+          <div class="card">
+            <div class="card-header pb-0">
+              <h5><i class="fas fa-wrench"></i> Software Update</h5>
+            </div>
+            <div class="card-body">
+              <!-- Dropzone Button for drag&drop files -->
+              <form
+                class="dropzone border rounded mb-3"
+                id="dropzone"
+                action="./upload"
+                method="post"
+                enctype="multipart/form-data"
+              >
+                <div class="dz-default dz-message">
+                  <span class="dz-message"
+                    >Click here, or drag and drop a software update image file
+                    to this area.</span
+                  >
+                </div>
+              </form>
+              <!-- Status -->
+              <div id="swu-idle" class="alert alert-secondary">
+                <i class="fas fa-info-circle"></i> Update not started.
+              </div>
+              <div
+                id="swu-run"
+                class="alert alert-warning"
+                style="display: none"
+              >
+                <i class="fas fa-exclamation-triangle"></i> Updating may take a
+                few minutes, please don't turn off the power.
+              </div>
+              <div
+                id="swu-success"
+                class="alert alert-success"
+                style="display: none"
+              >
+                <i class="fas fa-check-circle"></i> Updated successfully.
+              </div>
+              <div
+                id="swu-failure"
+                class="alert alert-danger"
+                style="display: none"
+              >
+                <i class="fas fa-times-circle"></i> Update failed.
+              </div>
+              <div id="swu-done" class="alert alert-info" style="display: none">
+                <i class="fas fa-sync"></i> Restarting system.
+              </div>
+              <!-- Progress -->
+              <i id="swu-progress-spinner" class="fas"></i>
+              <strong id="swu-progress-run" style="display: none"
+                >Updating:</strong
+              >
+              <span id="swu-progress-name"></span>
+              <span id="swu-progress-value" class="float-right"></span>
+              <div class="progress">
+                <div
+                  id="swu-progress-bar"
+                  class="progress-bar progress-bar-striped"
+                  role="progressbar"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Messages -->
+        <div class="col">
+          <div class="card">
+            <div class="card-header" id="headingMessages">
+              <a
+                class="h5"
+                data-toggle="collapse"
+                href="#collapseMessages"
+                aria-expanded="true"
+                aria-controls="collapseMessages"
+                ><i class="fas"></i> Messages</a
+              >
+            </div>
+            <div
+              id="collapseMessages"
+              class="collapse show"
+              aria-labelledby="headingMessages"
+            >
+              <div class="card-body" id="messages"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Restart -->
+      <div
+        id="swu-restart-modal"
+        class="modal fade"
+        tabindex="-1"
+        role="dialog"
+      >
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-body p-3 mb-2">
+              <div class="media">
+                <i
+                  class="fas fa-spinner fa-spin fa-3x align-self-center mr-3"
+                ></i>
+                <div class="media-body align-self-center">
+                  <h5 class="mt-0 mb-0">
+                    The system will restart. Please be patient, as restarting
+                    takes about one minute.
+                  </h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright text-center py-3">
+      The Robopipe Service Mode is based on
+      <a href="https://github.com/sbabic/swupdate">SWUpdate</a>
+    </div>
+  </body>
+</html>

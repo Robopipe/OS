@@ -19,6 +19,9 @@ prepare-base-os() {
     cpio -idm --no-absolute-filenames -I ../archive.swu && rm ../archive.swu
     mkdir root && cd root
     gzip -d ../root.cpio.gz && cpio -idm --no-absolute-filenames -I ../root.cpio && rm ../root.cpio
+    cd ../
+    mkdir boot && cd boot
+    gzip -d ../boot.cpio.gz && cpio -idm --no-absolute-filenames -I ../boot.cpio && rm ../boot.cpio
     cd ../../../
 }
 
@@ -27,6 +30,8 @@ archive() {
 
     cd base-os/archive/root
     find . -print -depth -mindepth 1 | cpio -o -H crc | gzip -c > ../root.cpio.gz
+    cd ../boot
+    find . -print -depth -mindepth 1 | cpio -o -H newc | gzip -c > ../boot.cpio.gz
     cd ../
     echo "${ARCHIVE_CONTENTS[@]}" | tr " " "\n" | cpio -o -H crc > "../../archive.swu"
     cd ../../
@@ -83,6 +88,32 @@ configure_os() {
     mv /etc/resolv.conf.bak /etc/resolv.conf
 }
 
+configure_boot() {
+    INITRD="initrd.img-6.1.55"
+
+    cd boot/altboot
+    mv "${INITRD}" "${INITRD}.gz"
+    gzip -d "${INITRD}.gz"
+    mkdir initrd && cd initrd
+    cpio -imd -I "../${INITRD}" && rm "../${INITRD}"
+
+    cd opt/swu
+    tar -xzf webapp.tar.gz && rm webapp.tar.gz
+    
+    cp "${DATA_PATH}/service-index.html" index.html
+    cp "${DATA_PATH}/robopipe-logo.svg" images/logo.svg
+    cp "${DATA_PATH}/favicon.png" images/favicon.png
+
+    tar --remove-files -czf webapp.tar.gz $(ls | grep -Ev "swupdate|ttyd")
+    cd ../../
+
+    find . | cpio -o -H newc | gzip -9 -n > "../${INITRD}"
+    cd ../
+    rm -rf "initrd"
+    chmod 755 "${INITRD}"
+    cd ../../
+}
+
 if [ ! -f "/etc/debian_version" ];
 then
     echo "This script needs to be run on Debian OS"
@@ -117,6 +148,8 @@ umount root/proc/
 umount root/sys/
 umount root/dev/
 umount root/mnt/
+
+configure_boot
 
 cd ../../
 
