@@ -51,17 +51,20 @@ configure_os() {
     apt update && apt install -y pipx git nginx owserver avahi-utils
     apt install -y --no-install-recommends evok-unipi-data
 
+    # User configuration
     cp -r /home/unipi/ "/home/${_USERNAME}/"
     useradd -d "/home/${_USERNAME}" -s /bin/bash ${_USERNAME}
     echo "${_USERNAME}:robopipe.io" | chpasswd
     find "/home/${_USERNAME}/" -user root -exec chown ${_USERNAME}:${_USERNAME} {} \;
     usermod -aG sudo,unipi,dialout,i2c,spi,gpio ${_USERNAME}
 
+    # Hostname service
     systemctl disable unipihostname
     cp /mnt/robopipehostname.service /etc/systemd/system/
     cp /mnt/set-robopipe-hostname.sh /opt/robopipe/tools/
     systemctl enable robopipehostname
 
+    # Pipx configuration
     pipx ensurepath
     pipx install pipx
     apt purge --autoremove -y pipx
@@ -69,15 +72,18 @@ configure_os() {
     . ~/.profile
     pipx uninstall pipx
     pipx ensurepath --global
+
+    # Robopipe API configuration
     pipx install --global /mnt/robopipe_api-0.1.0.tar.gz
-    cp /mnt/robopipeapi.service /etc/systemd/system/
     ln -s /etc/evok/hw_definitions /etc/robopipe/hw_definitions
     ln -s /etc/evok/autogen.yaml /etc/robopipe/autogen.yaml
     cp /mnt/controller-config.yaml /etc/robopipe/config.yaml
     cp /mnt/robopipe-api.env /etc/robopipe/.env
     echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' > /etc/udev/rules.d/80-movidius.rules
+    cp /mnt/robopipeapi.service /etc/systemd/system/
     systemctl enable robopipeapi
 
+    # Nginx configuration
     openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/certs/server.key -out /etc/ssl/certs/server.cert \
     -sha256 -days 3650 -nodes \
     -subj "/CN=robopipe.local"
