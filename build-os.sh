@@ -25,6 +25,19 @@ prepare-base-os() {
     cd ../../../
 }
 
+prepare-packages() {
+    ROBOPIPE_API_REPO="Robopipe/API"
+    ROBOPIPE_API_RES=$(wget -qO- "https://api.github.com/repos/${ROBOPIPE_API_REPO}/releases/latest")
+    ROBOPIPE_API_RELEASE=$(echo "${ROBOPIPE_API_RES}" | jq -r '.assets[] | select(.name | endswith("tar.gz")) | .browser_download_url')
+
+    export ROBOPIPE_API="robopipe-api.tar.gz"
+    wget "${ROBOPIPE_API_RELEASE}" -O "${DATA_PATH}/${ROBOPIPE_API}"
+}
+
+cleanup() {
+    rm "${DATA_PATH}/${ROBOPIPE_API}"
+}
+
 archive() {
     ARCHIVE_CONTENTS=("sw-description" "clearfs.sh" "root.cpio.gz" "boot.cpio.gz")
 
@@ -74,7 +87,7 @@ configure_os() {
     pipx ensurepath --global
 
     # Robopipe API configuration
-    pipx install --global /mnt/robopipe_api-0.1.0.tar.gz
+    pipx install --global "/mnt/${ROBOPIPE_API}"
     ln -s /etc/evok/hw_definitions /etc/robopipe/hw_definitions
     ln -s /etc/evok/autogen.yaml /etc/robopipe/autogen.yaml
     cp /mnt/controller-config.yaml /etc/robopipe/config.yaml
@@ -126,7 +139,7 @@ then
     exit 1
 fi
 
-for dep in sudo wget unzip cpio;
+for dep in sudo wget unzip cpio jq;
 do
     if ! command -v "${dep}" >/dev/null 2>&1;
     then
@@ -141,6 +154,7 @@ do
 done
 
 prepare-base-os
+prepare-packages
 cd base-os/archive
 
 mount -t proc /proc root/proc/
@@ -148,7 +162,7 @@ mount -t sysfs /sys root/sys/
 mount -o bind /dev root/dev/
 mount -o bind "${DATA_PATH}" root/mnt/
 
-sudo chroot root /bin/sh -c "$(declare -f configure_os); configure_os"
+sudo chroot root /bin/sh -c "ROBOPIPE_API=${ROBOPIPE_API}; $(declare -f configure_os); configure_os"
 
 umount root/proc/
 umount root/sys/
@@ -160,3 +174,4 @@ configure_boot
 cd ../../
 
 archive
+cleanup
