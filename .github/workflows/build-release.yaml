@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          lfs: true
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
@@ -24,7 +22,7 @@ jobs:
       - name: Install QEMU for ARM64
         uses: docker/setup-qemu-action@v2
         with:
-          platform: linux/arm64
+          platforms: linux/arm64
 
       - name: Build OS
         env:
