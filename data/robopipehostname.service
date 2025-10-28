@@ -1,5 +1,5 @@
 [Unit]
-description=Set robopipe controller hostname
+Description=Set robopipe controller hostname
 After=network.target
 
 [Service]
