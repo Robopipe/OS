@@ -10,7 +10,7 @@ prepare-base-os() {
         cp "${DATA_PATH}/base-os.zip" "base-os.zip"
     else
         echo "Downloading Base OS"
-        wget -nv --header="User-Agent: Mozilla/5.0" https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20240917.1.zip -O base-os.zip
+        wget -nv --header="User-Agent: Mozilla/5.0" https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20250617.0.zip -O base-os.zip
     fi
 
     unzip base-os.zip -d base-os && rm base-os.zip
@@ -61,7 +61,7 @@ configure_os() {
     mkdir -p /opt/robopipe/tools
     mkdir -p /etc/robopipe
 
-    apt update && apt install -y pipx git nginx owserver avahi-utils
+    apt update && apt install -y pipx git nginx owserver avahi-utils isc-dhcp-client isc-dhcp-server
     apt install -y --no-install-recommends evok-unipi-data
 
     # User configuration
@@ -76,6 +76,14 @@ configure_os() {
     cp /mnt/robopipehostname.service /etc/systemd/system/
     cp /mnt/set-robopipe-hostname.sh /opt/robopipe/tools/
     systemctl enable robopipehostname
+
+    DHCP service
+    cp /mnt/isc-dhcp-server /etc/default/
+    cp /mnt/dhcpd.conf /etc/dhcp/
+    cp /mnt/robopipedhcp.service /etc/systemd/system/
+    cp /mnt/enable-robopipe-dhcp.sh /opt/robopipe/tools/
+    systemctl disable isc-dhcp-server
+    systemctl enable robopipedhcp
 
     # Pipx configuration
     pipx ensurepath
