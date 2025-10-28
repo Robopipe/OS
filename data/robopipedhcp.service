@@ -1,0 +1,15 @@
+[Unit]
+Description=Enable DHCP server on robopipe controller if no DHCP server is present
+After=robopipehostname.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/robopipe/tools/enable-robopipe-dhcp.sh
+ExecStartPre=/bin/sh -c 'sleep 2'
+RemainAfterExit=true
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

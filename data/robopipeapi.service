@@ -1,7 +1,7 @@
 [Unit]
 Description=Start Robopipe API
-After=robopipehostname.service
-Requires=robopipehostname.service
+After=robopipedhcp.service
+Requires=robopipedhcp.service
 
 [Service]
 ExecStart=/bin/sh -c 'HOSTNAME=$(hostname) robopipe-api'
