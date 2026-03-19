@@ -10,7 +10,7 @@ prepare-base-os() {
         cp "${DATA_PATH}/base-os.zip" "base-os.zip"
     else
         echo "Downloading Base OS"
-        wget -nv --header="User-Agent: Mozilla/5.0" https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20250617.0.zip -O base-os.zip
+        wget -nv --header="User-Agent: Mozilla/5.0" https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20251103.1.zip -O base-os.zip
     fi
 
     unzip base-os.zip -d base-os && rm base-os.zip
@@ -26,11 +26,18 @@ prepare-base-os() {
 }
 
 prepare-packages() {
+    export ROBOPIPE_API="robopipe-api.tar.gz"
+
+    if [ -f "${DATA_PATH}/${ROBOPIPE_API}" ];
+    then
+        echo "Robopipe API package present"
+        return
+    fi
+
     ROBOPIPE_API_REPO="Robopipe/API"
     ROBOPIPE_API_RES=$(wget -qO- "https://api.github.com/repos/${ROBOPIPE_API_REPO}/releases/latest")
     ROBOPIPE_API_RELEASE=$(echo "${ROBOPIPE_API_RES}" | jq -r '.assets[] | select(.name | endswith("tar.gz")) | .browser_download_url')
 
-    export ROBOPIPE_API="robopipe-api.tar.gz"
     wget -nv "${ROBOPIPE_API_RELEASE}" -O "${DATA_PATH}/${ROBOPIPE_API}"
 }
 
