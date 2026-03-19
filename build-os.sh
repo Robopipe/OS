@@ -10,7 +10,7 @@ prepare-base-os() {
         cp "${DATA_PATH}/base-os.zip" "base-os.zip"
     else
         echo "Downloading Base OS"
-        wget -nv --header="User-Agent: Mozilla/5.0" https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20251103.1.zip -O base-os.zip
+        wget -nv --header="User-Agent: RobopipeOSBuilder/0.1" https://kb.unipi.technology/_media/files:software:os-images:patron-base-os_12.20251103.1.zip -O base-os.zip
     fi
 
     unzip base-os.zip -d base-os && rm base-os.zip
