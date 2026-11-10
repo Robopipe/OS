@@ -70,8 +70,7 @@ If you have a problem with the default configuration of the OS or a suggestion, 
 
 ## License
 
-Robopipe OS is open source under the [MIT License](LICENSE).
- The OS image also includes the Unipi Patron base OS and third-party packages under their own licences.
+Robopipe OS is open source under the [MIT License](LICENSE). The OS image also includes the Unipi Patron base OS and third-party packages under their own licences.
 
 ## Contact
 
